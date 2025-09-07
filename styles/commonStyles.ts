@@ -1,4 +1,16 @@
+
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { 
+  scale, 
+  moderateScale, 
+  getResponsivePadding, 
+  getResponsiveFontSizes,
+  isTablet,
+  SCREEN_WIDTH 
+} from '../utils/responsive';
+
+const padding = getResponsivePadding();
+const fonts = getResponsiveFontSizes();
 
 export const colors = {
   primary: '#162456',    // Material Blue
@@ -16,11 +28,17 @@ export const buttonStyles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignSelf: 'center',
     width: '100%',
+    paddingVertical: padding.md,
+    paddingHorizontal: padding.lg,
+    borderRadius: scale(8),
   },
   backButton: {
     backgroundColor: colors.backgroundAlt,
     alignSelf: 'center',
     width: '100%',
+    paddingVertical: padding.md,
+    paddingHorizontal: padding.lg,
+    borderRadius: scale(8),
   },
 });
 
@@ -35,55 +53,115 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    maxWidth: 800,
+    maxWidth: isTablet() ? 1024 : SCREEN_WIDTH,
     width: '100%',
+    paddingHorizontal: padding.md,
   },
   title: {
-    fontSize: 24,
+    fontSize: fonts.title,
     fontWeight: '800',
     textAlign: 'center',
     color: colors.text,
-    marginBottom: 10
+    marginBottom: padding.sm,
   },
   text: {
-    fontSize: 16,
+    fontSize: fonts.lg,
     fontWeight: '500',
     color: colors.text,
-    marginBottom: 8,
-    lineHeight: 24,
+    marginBottom: padding.xs,
+    lineHeight: fonts.lg * 1.5,
     textAlign: 'center',
   },
   section: {
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: padding.md,
   },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: padding.md,
   },
   card: {
     backgroundColor: colors.backgroundAlt,
     borderColor: colors.grey,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 8,
+    borderRadius: scale(12),
+    padding: padding.md,
+    marginVertical: padding.xs,
     width: '100%',
     boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.1)',
     elevation: 2,
   },
   icon: {
-    width: 60,
-    height: 60,
+    width: scale(60),
+    height: scale(60),
     tintColor: "white",
   },
+  // Responsive grid layouts
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: padding.md,
+  },
+  gridItem2: {
+    width: isTablet() ? '48%' : '48%',
+    marginBottom: padding.md,
+  },
+  gridItem3: {
+    width: isTablet() ? '31%' : '100%',
+    marginBottom: padding.md,
+  },
+  gridItem4: {
+    width: isTablet() ? '23%' : '48%',
+    marginBottom: padding.md,
+  },
+  // Responsive text styles
+  textXS: {
+    fontSize: fonts.xs,
+    color: colors.text,
+  },
+  textSM: {
+    fontSize: fonts.sm,
+    color: colors.text,
+  },
+  textMD: {
+    fontSize: fonts.md,
+    color: colors.text,
+  },
+  textLG: {
+    fontSize: fonts.lg,
+    color: colors.text,
+  },
+  textXL: {
+    fontSize: fonts.xl,
+    color: colors.text,
+  },
+  textXXL: {
+    fontSize: fonts.xxl,
+    color: colors.text,
+  },
+  // Responsive spacing
+  marginXS: { margin: padding.xs },
+  marginSM: { margin: padding.sm },
+  marginMD: { margin: padding.md },
+  marginLG: { margin: padding.lg },
+  paddingXS: { padding: padding.xs },
+  paddingSM: { padding: padding.sm },
+  paddingMD: { padding: padding.md },
+  paddingLG: { padding: padding.lg },
 });
+
+// Export responsive values for direct use
+export const responsiveValues = {
+  padding,
+  fonts,
+  scale,
+  moderateScale,
+};

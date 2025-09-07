@@ -2,7 +2,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { TradingSignal } from '../types/trading';
-import { colors } from '../styles/commonStyles';
+import { colors, responsiveValues } from '../styles/commonStyles';
+import { isTablet, isSmallDevice } from '../utils/responsive';
 import Icon from './Icon';
 
 interface SignalCardProps {
@@ -68,14 +69,14 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, onExecute }) => {
             style={[styles.executeButton, { backgroundColor: signalColor }]}
             onPress={() => onExecute(signal.id)}
           >
-            <Icon name="play" size={16} color="white" />
+            <Icon name="play" size={responsiveValues.scale(16)} color="white" />
             <Text style={styles.executeButtonText}>Execute</Text>
           </TouchableOpacity>
         )}
         
         {signal.status === 'EXECUTED' && (
           <View style={styles.executedBadge}>
-            <Icon name="checkmark-circle" size={16} color="#4CAF50" />
+            <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
             <Text style={styles.executedText}>Executed</Text>
           </View>
         )}
@@ -87,103 +88,107 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, onExecute }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 6,
-    borderLeftWidth: 4,
+    borderRadius: responsiveValues.scale(12),
+    padding: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.xs,
+    borderLeftWidth: responsiveValues.scale(4),
     borderLeftColor: colors.accent,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: isTablet() ? 'row' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
+    flexWrap: isSmallDevice() ? 'wrap' : 'nowrap',
   },
   signalInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: isSmallDevice() ? 1 : undefined,
   },
   signalType: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginRight: 8,
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    borderRadius: responsiveValues.scale(6),
+    marginRight: responsiveValues.padding.xs,
   },
   signalTypeText: {
     color: 'white',
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
   },
   asset: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
   },
   confidence: {
     alignItems: 'center',
+    marginTop: isSmallDevice() ? responsiveValues.padding.xs : 0,
   },
   confidenceText: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
   },
   priceInfo: {
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: responsiveValues.padding.xs / 2,
   },
   priceLabel: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
   },
   priceValue: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },
   reasoning: {
-    fontSize: 13,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
     fontStyle: 'italic',
-    marginBottom: 12,
-    lineHeight: 18,
+    marginBottom: responsiveValues.padding.sm,
+    lineHeight: responsiveValues.fonts.sm * 1.4,
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: isSmallDevice() ? 'column' : 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: isSmallDevice() ? 'flex-start' : 'center',
+    gap: isSmallDevice() ? responsiveValues.padding.xs : 0,
   },
   timeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   timeframe: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.text,
     backgroundColor: colors.primary,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginRight: 8,
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    borderRadius: responsiveValues.scale(4),
+    marginRight: responsiveValues.padding.xs,
   },
   timestamp: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.grey,
   },
   executeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: responsiveValues.padding.sm,
+    paddingVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(6),
   },
   executeButtonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 12,
-    marginLeft: 4,
+    fontSize: responsiveValues.fonts.xs,
+    marginLeft: responsiveValues.padding.xs / 2,
   },
   executedBadge: {
     flexDirection: 'row',
@@ -192,8 +197,8 @@ const styles = StyleSheet.create({
   executedText: {
     color: '#4CAF50',
     fontWeight: '600',
-    fontSize: 12,
-    marginLeft: 4,
+    fontSize: responsiveValues.fonts.xs,
+    marginLeft: responsiveValues.padding.xs / 2,
   },
 });
 

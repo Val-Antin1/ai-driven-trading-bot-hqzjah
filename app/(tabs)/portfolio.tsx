@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { colors, commonStyles } from '../../styles/commonStyles';
+import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
 import { useTradingData } from '../../hooks/useTradingData';
 import { TradeHistory } from '../../types/trading';
+import { isTablet, isSmallDevice } from '../../utils/responsive';
 import Icon from '../../components/Icon';
 
 export default function PortfolioScreen() {
@@ -164,11 +165,11 @@ export default function PortfolioScreen() {
             <Text style={styles.sectionTitle}>Trade History</Text>
             <View style={styles.tradesStats}>
               <View style={styles.statBadge}>
-                <Icon name="trending-up" size={12} color="#4CAF50" />
+                <Icon name="trending-up" size={responsiveValues.scale(12)} color="#4CAF50" />
                 <Text style={styles.statBadgeText}>{winningTrades.length}</Text>
               </View>
               <View style={[styles.statBadge, { backgroundColor: '#F44336' }]}>
-                <Icon name="trending-down" size={12} color="white" />
+                <Icon name="trending-down" size={responsiveValues.scale(12)} color="white" />
                 <Text style={styles.statBadgeText}>{losingTrades.length}</Text>
               </View>
             </View>
@@ -180,7 +181,7 @@ export default function PortfolioScreen() {
             ))
           ) : (
             <View style={styles.emptyState}>
-              <Icon name="bar-chart-outline" size={48} color={colors.grey} />
+              <Icon name="bar-chart-outline" size={responsiveValues.scale(48)} color={colors.grey} />
               <Text style={styles.emptyStateTitle}>No Trades Found</Text>
               <Text style={styles.emptyStateText}>
                 No trades found for the selected period. Try selecting a different time range.
@@ -193,17 +194,17 @@ export default function PortfolioScreen() {
           <Text style={styles.sectionTitle}>Risk Metrics</Text>
           <View style={styles.riskGrid}>
             <View style={styles.riskItem}>
-              <Icon name="shield-checkmark" size={20} color="#4CAF50" />
+              <Icon name="shield-checkmark" size={responsiveValues.scale(20)} color="#4CAF50" />
               <Text style={styles.riskLabel}>Max Drawdown</Text>
               <Text style={styles.riskValue}>-3.2%</Text>
             </View>
             <View style={styles.riskItem}>
-              <Icon name="trending-up" size={20} color={colors.accent} />
+              <Icon name="trending-up" size={responsiveValues.scale(20)} color={colors.accent} />
               <Text style={styles.riskLabel}>Sharpe Ratio</Text>
               <Text style={styles.riskValue}>1.85</Text>
             </View>
             <View style={styles.riskItem}>
-              <Icon name="analytics" size={20} color="#FF9800" />
+              <Icon name="analytics" size={responsiveValues.scale(20)} color="#FF9800" />
               <Text style={styles.riskLabel}>Profit Factor</Text>
               <Text style={styles.riskValue}>2.1</Text>
             </View>
@@ -216,12 +217,12 @@ export default function PortfolioScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.md,
     backgroundColor: colors.backgroundAlt,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: responsiveValues.fonts.title,
     fontWeight: '800',
     color: colors.text,
   },
@@ -230,54 +231,55 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: colors.backgroundAlt,
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
+    margin: responsiveValues.padding.md,
+    padding: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
   },
   summaryTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 16,
+    marginBottom: responsiveValues.padding.md,
   },
   summaryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: isTablet() ? responsiveValues.padding.sm : responsiveValues.padding.xs,
   },
   summaryItem: {
-    width: '48%',
-    marginBottom: 12,
+    width: isTablet() ? '48%' : '48%',
+    marginBottom: responsiveValues.padding.sm,
   },
   summaryLabel: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    marginBottom: 4,
+    marginBottom: responsiveValues.padding.xs / 2,
   },
   summaryValue: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
   },
   periodSelector: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: responsiveValues.padding.md,
+    marginBottom: responsiveValues.padding.md,
   },
   periodLabel: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: responsiveValues.padding.xs,
   },
   periodButtons: {
     flexDirection: 'row',
+    gap: responsiveValues.padding.xs,
   },
   periodButton: {
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(20),
     borderWidth: 1,
     borderColor: colors.grey,
   },
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
   },
   periodButtonText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },
@@ -294,87 +296,87 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   tradesSection: {
-    paddingHorizontal: 16,
+    paddingHorizontal: responsiveValues.padding.md,
   },
   tradesSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
   },
   tradesStats: {
     flexDirection: 'row',
+    gap: responsiveValues.padding.xs / 2,
   },
   statBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4CAF50',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 4,
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    borderRadius: responsiveValues.scale(12),
   },
   statBadgeText: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     fontWeight: '700',
     color: 'white',
-    marginLeft: 2,
+    marginLeft: responsiveValues.padding.xs / 2,
   },
   tradeItem: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
+    borderRadius: responsiveValues.scale(12),
+    padding: responsiveValues.padding.md,
+    marginBottom: responsiveValues.padding.xs,
   },
   tradeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   tradeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   tradeAsset: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
-    marginRight: 8,
+    marginRight: responsiveValues.padding.xs,
   },
   tradeType: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    borderRadius: responsiveValues.scale(4),
   },
   tradeTypeText: {
-    fontSize: 10,
+    fontSize: responsiveValues.fonts.xs,
     fontWeight: '700',
     color: 'white',
   },
   tradeProfit: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
   },
   tradeDetails: {
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   tradeDetailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: responsiveValues.padding.xs / 2,
   },
   tradeDetailLabel: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
   },
   tradeDetailValue: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },
@@ -384,52 +386,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tradeDate: {
-    fontSize: 11,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.grey,
   },
   tradeDuration: {
-    fontSize: 11,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.grey,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 40,
+    paddingVertical: responsiveValues.padding.xl,
   },
   emptyStateTitle: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
-    marginTop: 12,
-    marginBottom: 4,
+    marginTop: responsiveValues.padding.sm,
+    marginBottom: responsiveValues.padding.xs / 2,
   },
   emptyStateText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
     textAlign: 'center',
   },
   riskMetrics: {
     backgroundColor: colors.backgroundAlt,
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
+    margin: responsiveValues.padding.md,
+    padding: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
   },
   riskGrid: {
-    flexDirection: 'row',
+    flexDirection: isTablet() ? 'row' : 'row',
     justifyContent: 'space-around',
-    marginTop: 12,
+    marginTop: responsiveValues.padding.sm,
+    flexWrap: isSmallDevice() ? 'wrap' : 'nowrap',
+    gap: isSmallDevice() ? responsiveValues.padding.sm : 0,
   },
   riskItem: {
     alignItems: 'center',
+    flex: isTablet() ? 1 : undefined,
+    minWidth: isSmallDevice() ? '30%' : undefined,
   },
   riskLabel: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.grey,
-    marginTop: 4,
-    marginBottom: 2,
+    marginTop: responsiveValues.padding.xs / 2,
+    marginBottom: responsiveValues.padding.xs / 2,
+    textAlign: 'center',
   },
   riskValue: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '700',
     color: colors.text,
   },

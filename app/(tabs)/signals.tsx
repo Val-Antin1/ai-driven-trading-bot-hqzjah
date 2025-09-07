@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
-import { colors, commonStyles } from '../../styles/commonStyles';
+import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
 import { useTradingData } from '../../hooks/useTradingData';
+import { isTablet, isSmallDevice } from '../../utils/responsive';
 import SignalCard from '../../components/SignalCard';
 import Icon from '../../components/Icon';
 import { TimeFrame, TradingMode } from '../../types/trading';
@@ -23,7 +24,6 @@ export default function SignalsScreen() {
 
   const filteredSignals = tradingSignals.filter(signal => {
     const timeframeMatch = selectedTimeframe === 'ALL' || signal.timeframe === selectedTimeframe;
-    // For now, we'll just filter by timeframe since we don't have mode in our signal data
     return timeframeMatch;
   });
 
@@ -35,7 +35,7 @@ export default function SignalsScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trading Signals</Text>
         <TouchableOpacity onPress={refreshData} style={styles.refreshButton}>
-          <Icon name="refresh" size={20} color={colors.accent} />
+          <Icon name="refresh" size={responsiveValues.scale(20)} color={colors.accent} />
         </TouchableOpacity>
       </View>
 
@@ -113,7 +113,7 @@ export default function SignalsScreen() {
 
         {filteredSignals.length === 0 && (
           <View style={styles.emptyState}>
-            <Icon name="flash-off" size={48} color={colors.grey} />
+            <Icon name="flash-off" size={responsiveValues.scale(48)} color={colors.grey} />
             <Text style={styles.emptyStateTitle}>No Signals Available</Text>
             <Text style={styles.emptyStateText}>
               The AI is analyzing market conditions. New signals will appear when opportunities are detected.
@@ -123,7 +123,7 @@ export default function SignalsScreen() {
 
         <View style={styles.aiInsight}>
           <View style={styles.aiInsightHeader}>
-            <Icon name="bulb" size={20} color="#FF9800" />
+            <Icon name="bulb" size={responsiveValues.scale(20)} color="#FF9800" />
             <Text style={styles.aiInsightTitle}>AI Market Insight</Text>
           </View>
           <Text style={styles.aiInsightText}>
@@ -140,38 +140,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.md,
     backgroundColor: colors.backgroundAlt,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: responsiveValues.fonts.title,
     fontWeight: '800',
     color: colors.text,
   },
   refreshButton: {
-    padding: 8,
+    padding: responsiveValues.padding.xs,
   },
   filtersContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.sm,
     backgroundColor: colors.background,
   },
   filterLabel: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: responsiveValues.padding.xs,
   },
   filterRow: {
     flexDirection: 'row',
+    gap: responsiveValues.padding.xs,
   },
   filterButton: {
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
+    paddingHorizontal: responsiveValues.padding.sm,
+    paddingVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(16),
     borderWidth: 1,
     borderColor: colors.grey,
   },
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
   },
   filterButtonText: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     fontWeight: '600',
     color: colors.text,
   },
@@ -191,74 +191,75 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    paddingHorizontal: 16,
-    marginVertical: 8,
+    paddingHorizontal: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.xs,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginRight: 8,
+    marginRight: responsiveValues.padding.xs,
   },
   badge: {
     backgroundColor: colors.accent,
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    minWidth: 20,
+    borderRadius: responsiveValues.scale(10),
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    minWidth: responsiveValues.scale(20),
     alignItems: 'center',
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     fontWeight: '700',
     color: 'white',
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 40,
+    paddingVertical: responsiveValues.padding.xl * 2,
+    paddingHorizontal: responsiveValues.padding.xl,
   },
   emptyStateTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: responsiveValues.padding.md,
+    marginBottom: responsiveValues.padding.xs,
+    textAlign: 'center',
   },
   emptyStateText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: responsiveValues.fonts.sm * 1.4,
   },
   aiInsight: {
     backgroundColor: colors.backgroundAlt,
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
-    borderLeftWidth: 4,
+    margin: responsiveValues.padding.md,
+    padding: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
+    borderLeftWidth: responsiveValues.scale(4),
     borderLeftColor: '#FF9800',
   },
   aiInsightHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: responsiveValues.padding.xs,
   },
   aiInsightTitle: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
-    marginLeft: 8,
+    marginLeft: responsiveValues.padding.xs,
   },
   aiInsightText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    lineHeight: 18,
+    lineHeight: responsiveValues.fonts.sm * 1.3,
   },
 });

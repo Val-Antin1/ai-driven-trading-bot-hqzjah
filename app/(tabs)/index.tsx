@@ -3,8 +3,9 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { colors, commonStyles } from '../../styles/commonStyles';
+import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
 import { useTradingData } from '../../hooks/useTradingData';
+import { isTablet, isSmallDevice } from '../../utils/responsive';
 import TradingChart from '../../components/TradingChart';
 import MarketOverview from '../../components/MarketOverview';
 import AccountSummary from '../../components/AccountSummary';
@@ -22,7 +23,7 @@ export default function DashboardScreen() {
   } = useTradingData();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = ['25%', '50%', '90%'];
+  const snapPoints = isTablet() ? ['20%', '40%', '80%'] : ['25%', '50%', '90%'];
 
   const handleSheetChanges = (index: number) => {
     console.log('Bottom sheet changed to index:', index);
@@ -39,14 +40,14 @@ export default function DashboardScreen() {
     <GestureHandlerRootView style={commonStyles.wrapper}>
       <View style={commonStyles.container}>
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>AI Trading Bot</Text>
             <Text style={styles.headerSubtitle}>
               {activeSignals.length} active signals
             </Text>
           </View>
           <TouchableOpacity onPress={openBottomSheet} style={styles.infoButton}>
-            <Icon name="information-circle" size={24} color={colors.accent} />
+            <Icon name="information-circle" size={responsiveValues.scale(24)} color={colors.accent} />
           </TouchableOpacity>
         </View>
 
@@ -71,12 +72,13 @@ export default function DashboardScreen() {
               <TradingChart 
                 symbol={latestSignal.asset} 
                 timeframe={latestSignal.timeframe}
-                height={200}
               />
-              <SignalCard 
-                signal={latestSignal} 
-                onExecute={executeTrade}
-              />
+              <View style={styles.signalContainer}>
+                <SignalCard 
+                  signal={latestSignal} 
+                  onExecute={executeTrade}
+                />
+              </View>
             </View>
           )}
 
@@ -85,23 +87,22 @@ export default function DashboardScreen() {
             <TradingChart 
               symbol="EURUSD" 
               timeframe="1h"
-              height={180}
             />
           </View>
 
           <View style={styles.quickStats}>
             <View style={styles.statItem}>
-              <Icon name="trending-up" size={20} color="#4CAF50" />
+              <Icon name="trending-up" size={responsiveValues.scale(20)} color="#4CAF50" />
               <Text style={styles.statLabel}>Win Rate</Text>
               <Text style={styles.statValue}>{accountInfo.winRate.toFixed(1)}%</Text>
             </View>
             <View style={styles.statItem}>
-              <Icon name="flash" size={20} color={colors.accent} />
+              <Icon name="flash" size={responsiveValues.scale(20)} color={colors.accent} />
               <Text style={styles.statLabel}>Active Signals</Text>
               <Text style={styles.statValue}>{activeSignals.length}</Text>
             </View>
             <View style={styles.statItem}>
-              <Icon name="bar-chart" size={20} color="#FF9800" />
+              <Icon name="bar-chart" size={responsiveValues.scale(20)} color="#FF9800" />
               <Text style={styles.statLabel}>Total Trades</Text>
               <Text style={styles.statValue}>{accountInfo.totalTrades}</Text>
             </View>
@@ -124,19 +125,19 @@ export default function DashboardScreen() {
             </Text>
             <View style={styles.featureList}>
               <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={16} color="#4CAF50" />
+                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
                 <Text style={styles.featureText}>Real-time market analysis</Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={16} color="#4CAF50" />
+                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
                 <Text style={styles.featureText}>Risk management tools</Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={16} color="#4CAF50" />
+                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
                 <Text style={styles.featureText}>Multi-timeframe signals</Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={16} color="#4CAF50" />
+                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
                 <Text style={styles.featureText}>News sentiment analysis</Text>
               </View>
             </View>
@@ -152,85 +153,96 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.md,
     backgroundColor: colors.backgroundAlt,
   },
+  headerContent: {
+    flex: 1,
+  },
   headerTitle: {
-    fontSize: 24,
+    fontSize: responsiveValues.fonts.title,
     fontWeight: '800',
     color: colors.text,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    marginTop: 2,
+    marginTop: responsiveValues.padding.xs / 2,
   },
   infoButton: {
-    padding: 8,
+    padding: responsiveValues.padding.xs,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    paddingHorizontal: 16,
-    marginVertical: 8,
+    paddingHorizontal: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.xs,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
+  },
+  signalContainer: {
+    marginTop: responsiveValues.padding.xs,
   },
   quickStats: {
-    flexDirection: 'row',
+    flexDirection: isTablet() ? 'row' : 'row',
     justifyContent: 'space-around',
     backgroundColor: colors.backgroundAlt,
-    marginHorizontal: 16,
-    marginVertical: 16,
-    borderRadius: 12,
-    paddingVertical: 20,
+    marginHorizontal: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
+    paddingVertical: responsiveValues.padding.lg,
+    flexWrap: isSmallDevice() ? 'wrap' : 'nowrap',
+    gap: isSmallDevice() ? responsiveValues.padding.sm : 0,
   },
   statItem: {
     alignItems: 'center',
+    flex: isTablet() ? 1 : undefined,
+    minWidth: isSmallDevice() ? '30%' : undefined,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.xs,
     color: colors.grey,
-    marginTop: 4,
-    marginBottom: 2,
+    marginTop: responsiveValues.padding.xs / 2,
+    marginBottom: responsiveValues.padding.xs / 2,
+    textAlign: 'center',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
   },
   bottomSheetContent: {
-    padding: 20,
+    padding: responsiveValues.padding.lg,
   },
   bottomSheetTitle: {
-    fontSize: 20,
+    fontSize: responsiveValues.fonts.xxl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   bottomSheetText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    lineHeight: 20,
-    marginBottom: 16,
+    lineHeight: responsiveValues.fonts.sm * 1.4,
+    marginBottom: responsiveValues.padding.md,
   },
   featureList: {
-    marginTop: 8,
+    marginTop: responsiveValues.padding.xs,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: responsiveValues.padding.xs,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.text,
-    marginLeft: 8,
+    marginLeft: responsiveValues.padding.xs,
   },
 });

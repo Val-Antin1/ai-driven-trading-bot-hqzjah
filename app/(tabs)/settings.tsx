@@ -3,8 +3,9 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { colors, commonStyles } from '../../styles/commonStyles';
+import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
 import { useTradingData } from '../../hooks/useTradingData';
+import { isTablet, isSmallDevice } from '../../utils/responsive';
 import RiskManagement from '../../components/RiskManagement';
 import Icon from '../../components/Icon';
 import { TimeFrame, TradingMode, AssetType } from '../../types/trading';
@@ -19,7 +20,7 @@ export default function SettingsScreen() {
   const [selectedAssets, setSelectedAssets] = useState<AssetType[]>(['FOREX', 'CRYPTO']);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = ['25%', '50%', '90%'];
+  const snapPoints = isTablet() ? ['20%', '40%', '80%'] : ['25%', '50%', '90%'];
 
   const timeframes: TimeFrame[] = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
   const tradingModes: { key: TradingMode; label: string; description: string }[] = [
@@ -71,13 +72,13 @@ export default function SettingsScreen() {
   }> = ({ title, subtitle, icon, onPress, rightComponent }) => (
     <TouchableOpacity style={styles.settingItem} onPress={onPress}>
       <View style={styles.settingLeft}>
-        <Icon name={icon as any} size={20} color={colors.accent} />
+        <Icon name={icon as any} size={responsiveValues.scale(20)} color={colors.accent} />
         <View style={styles.settingText}>
           <Text style={styles.settingTitle}>{title}</Text>
           {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
         </View>
       </View>
-      {rightComponent || <Icon name="chevron-forward" size={16} color={colors.grey} />}
+      {rightComponent || <Icon name="chevron-forward" size={responsiveValues.scale(16)} color={colors.grey} />}
     </TouchableOpacity>
   );
 
@@ -251,7 +252,7 @@ export default function SettingsScreen() {
                     </Text>
                   </View>
                   {selectedMode === key && (
-                    <Icon name="checkmark-circle" size={20} color={colors.accent} />
+                    <Icon name="checkmark-circle" size={responsiveValues.scale(20)} color={colors.accent} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -288,12 +289,12 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.md,
     backgroundColor: colors.backgroundAlt,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: responsiveValues.fonts.title,
     fontWeight: '800',
     color: colors.text,
   },
@@ -302,22 +303,22 @@ const styles = StyleSheet.create({
   },
   section: {
     backgroundColor: colors.backgroundAlt,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    padding: 16,
+    marginHorizontal: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(12),
+    padding: responsiveValues.padding.md,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 16,
+    marginBottom: responsiveValues.padding.md,
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: responsiveValues.padding.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.background,
   },
@@ -327,38 +328,38 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingText: {
-    marginLeft: 12,
+    marginLeft: responsiveValues.padding.sm,
     flex: 1,
   },
   settingTitle: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '600',
     color: colors.text,
   },
   settingSubtitle: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    marginTop: 2,
+    marginTop: responsiveValues.padding.xs / 2,
   },
   assetSelection: {
-    marginTop: 16,
+    marginTop: responsiveValues.padding.md,
   },
   assetSelectionTitle: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   assetGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: responsiveValues.padding.xs,
   },
   assetButton: {
     backgroundColor: colors.background,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: responsiveValues.padding.sm,
+    paddingVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(20),
     borderWidth: 1,
     borderColor: colors.grey,
   },
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
   },
   assetButtonText: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },
@@ -375,31 +376,31 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   bottomSheetContent: {
-    padding: 20,
+    padding: responsiveValues.padding.lg,
   },
   bottomSheetTitle: {
-    fontSize: 20,
+    fontSize: responsiveValues.fonts.xxl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 20,
+    marginBottom: responsiveValues.padding.lg,
   },
   strategySection: {
-    marginBottom: 24,
+    marginBottom: responsiveValues.padding.xl,
   },
   strategyLabel: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   strategyOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.background,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    padding: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
+    marginBottom: responsiveValues.padding.xs,
     borderWidth: 1,
     borderColor: colors.background,
   },
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   strategyOptionTitle: {
-    fontSize: 14,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },
@@ -419,20 +420,20 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   strategyOptionDescription: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    marginTop: 2,
+    marginTop: responsiveValues.padding.xs / 2,
   },
   timeframeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: responsiveValues.padding.xs,
   },
   timeframeButton: {
     backgroundColor: colors.background,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: responsiveValues.padding.md,
+    paddingVertical: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(20),
     borderWidth: 1,
     borderColor: colors.grey,
   },
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
   },
   timeframeButtonText: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     fontWeight: '600',
     color: colors.text,
   },

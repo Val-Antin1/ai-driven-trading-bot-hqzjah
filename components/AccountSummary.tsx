@@ -2,7 +2,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { AccountInfo } from '../types/trading';
-import { colors } from '../styles/commonStyles';
+import { colors, responsiveValues } from '../styles/commonStyles';
+import { isTablet } from '../utils/responsive';
 
 interface AccountSummaryProps {
   accountInfo: AccountInfo;
@@ -53,32 +54,34 @@ const AccountSummary: React.FC<AccountSummaryProps> = ({ accountInfo }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
+    borderRadius: responsiveValues.scale(12),
+    padding: responsiveValues.padding.md,
+    marginVertical: responsiveValues.padding.xs,
+    marginHorizontal: responsiveValues.padding.md,
   },
   title: {
-    fontSize: 18,
+    fontSize: responsiveValues.fonts.xl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: responsiveValues.padding.sm,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: isTablet() ? responsiveValues.padding.sm : responsiveValues.padding.xs,
   },
   item: {
-    width: '48%',
-    marginBottom: 12,
+    width: isTablet() ? '48%' : '48%',
+    marginBottom: responsiveValues.padding.sm,
   },
   label: {
-    fontSize: 12,
+    fontSize: responsiveValues.fonts.sm,
     color: colors.grey,
-    marginBottom: 4,
+    marginBottom: responsiveValues.padding.xs / 2,
   },
   value: {
-    fontSize: 16,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
   },
