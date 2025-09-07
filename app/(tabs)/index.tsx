@@ -3,16 +3,18 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
 import { useTradingData } from '../../hooks/useTradingData';
 import { isTablet, isSmallDevice } from '../../utils/responsive';
-import TradingChart from '../../components/TradingChart';
-import MarketOverview from '../../components/MarketOverview';
+import { colors, commonStyles, responsiveValues } from '../../styles/commonStyles';
+import Icon from '../../components/Icon';
+import LiveTradingChart from '../../components/LiveTradingChart';
+import MarketStatusIndicator from '../../components/MarketStatusIndicator';
 import AccountSummary from '../../components/AccountSummary';
 import SignalCard from '../../components/SignalCard';
-import Icon from '../../components/Icon';
+import MarketOverview from '../../components/MarketOverview';
 
-export default function DashboardScreen() {
+const DashboardScreen: React.FC = () => {
+  const bottomSheetRef = useRef<BottomSheet>(null);
   const {
     marketData,
     tradingSignals,
@@ -22,9 +24,6 @@ export default function DashboardScreen() {
     executeTrade,
   } = useTradingData();
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = isTablet() ? ['20%', '40%', '80%'] : ['25%', '50%', '90%'];
-
   const handleSheetChanges = (index: number) => {
     console.log('Bottom sheet changed to index:', index);
   };
@@ -33,216 +32,204 @@ export default function DashboardScreen() {
     bottomSheetRef.current?.expand();
   };
 
-  const activeSignals = tradingSignals.filter(signal => signal.status === 'ACTIVE');
-  const latestSignal = activeSignals[0];
+  // Get major trading symbols for market status
+  const majorSymbols = ['EURUSD', 'GBPUSD', 'BTCUSD', 'ETHUSD'];
 
   return (
-    <GestureHandlerRootView style={commonStyles.wrapper}>
+    <GestureHandlerRootView style={commonStyles.flex1}>
       <View style={commonStyles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>AI Trading Bot</Text>
-            <Text style={styles.headerSubtitle}>
-              {activeSignals.length} active signals
-            </Text>
-          </View>
-          <TouchableOpacity onPress={openBottomSheet} style={styles.infoButton}>
-            <Icon name="information-circle" size={responsiveValues.scale(24)} color={colors.accent} />
-          </TouchableOpacity>
-        </View>
-
         <ScrollView
-          style={styles.scrollView}
+          style={commonStyles.flex1}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
               onRefresh={refreshData}
-              tintColor={colors.accent}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
-          <MarketOverview marketData={marketData} />
-          
+          {/* Header */}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.greeting}>Good {getTimeOfDay()}</Text>
+              <Text style={styles.title}>Trading Dashboard</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.settingsButton}
+              onPress={openBottomSheet}
+            >
+              <Icon name="settings" size={responsiveValues.scale(24)} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Market Status Indicator */}
+          <MarketStatusIndicator symbols={majorSymbols} />
+
+          {/* Account Summary */}
           <AccountSummary accountInfo={accountInfo} />
 
-          {latestSignal && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Latest Signal</Text>
-              <TradingChart 
-                symbol={latestSignal.asset} 
-                timeframe={latestSignal.timeframe}
-              />
-              <View style={styles.signalContainer}>
-                <SignalCard 
-                  signal={latestSignal} 
-                  onExecute={executeTrade}
-                />
-              </View>
-            </View>
-          )}
-
+          {/* Live Trading Charts */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Market Analysis</Text>
-            <TradingChart 
+            <Text style={styles.sectionTitle}>Live Charts</Text>
+            <LiveTradingChart 
               symbol="EURUSD" 
-              timeframe="1h"
+              timeframe="1h" 
+              updateInterval={2000}
+            />
+            <LiveTradingChart 
+              symbol="BTCUSD" 
+              timeframe="1h" 
+              updateInterval={3000}
             />
           </View>
 
-          <View style={styles.quickStats}>
-            <View style={styles.statItem}>
-              <Icon name="trending-up" size={responsiveValues.scale(20)} color="#4CAF50" />
-              <Text style={styles.statLabel}>Win Rate</Text>
-              <Text style={styles.statValue}>{accountInfo.winRate.toFixed(1)}%</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Icon name="flash" size={responsiveValues.scale(20)} color={colors.accent} />
-              <Text style={styles.statLabel}>Active Signals</Text>
-              <Text style={styles.statValue}>{activeSignals.length}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Icon name="bar-chart" size={responsiveValues.scale(20)} color="#FF9800" />
-              <Text style={styles.statLabel}>Total Trades</Text>
-              <Text style={styles.statValue}>{accountInfo.totalTrades}</Text>
-            </View>
+          {/* Market Overview */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Market Overview</Text>
+            <MarketOverview marketData={marketData} />
           </View>
+
+          {/* Recent Signals */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Signals</Text>
+              <TouchableOpacity>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
+            </View>
+            {tradingSignals.slice(0, 3).map((signal) => (
+              <SignalCard
+                key={signal.id}
+                signal={signal}
+                onExecute={executeTrade}
+              />
+            ))}
+          </View>
+
+          {/* Bottom padding for safe area */}
+          <View style={{ height: responsiveValues.padding.xl }} />
         </ScrollView>
 
+        {/* Bottom Sheet for Quick Actions */}
         <BottomSheet
           ref={bottomSheetRef}
           index={-1}
-          snapPoints={snapPoints}
+          snapPoints={['25%', '50%']}
           onChange={handleSheetChanges}
-          enablePanDownToClose={true}
+          enablePanDownToClose
           backgroundStyle={{ backgroundColor: colors.backgroundAlt }}
           handleIndicatorStyle={{ backgroundColor: colors.grey }}
         >
           <BottomSheetView style={styles.bottomSheetContent}>
-            <Text style={styles.bottomSheetTitle}>AI Trading Assistant</Text>
-            <Text style={styles.bottomSheetText}>
-              Our AI analyzes market data using advanced technical indicators including RSI, MACD, and Moving Averages to generate high-confidence trading signals.
-            </Text>
-            <View style={styles.featureList}>
-              <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
-                <Text style={styles.featureText}>Real-time market analysis</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
-                <Text style={styles.featureText}>Risk management tools</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
-                <Text style={styles.featureText}>Multi-timeframe signals</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Icon name="checkmark-circle" size={responsiveValues.scale(16)} color="#4CAF50" />
-                <Text style={styles.featureText}>News sentiment analysis</Text>
-              </View>
+            <Text style={styles.bottomSheetTitle}>Quick Actions</Text>
+            
+            <View style={styles.quickActions}>
+              <TouchableOpacity style={styles.quickActionButton}>
+                <Icon name="trending-up" size={responsiveValues.scale(24)} color={colors.primary} />
+                <Text style={styles.quickActionText}>New Signal</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.quickActionButton}>
+                <Icon name="bar-chart" size={responsiveValues.scale(24)} color={colors.primary} />
+                <Text style={styles.quickActionText}>Analysis</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.quickActionButton}>
+                <Icon name="settings" size={responsiveValues.scale(24)} color={colors.primary} />
+                <Text style={styles.quickActionText}>Settings</Text>
+              </TouchableOpacity>
             </View>
           </BottomSheetView>
         </BottomSheet>
       </View>
     </GestureHandlerRootView>
   );
-}
+};
+
+const getTimeOfDay = (): string => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Morning';
+  if (hour < 17) return 'Afternoon';
+  return 'Evening';
+};
 
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: responsiveValues.padding.md,
-    paddingVertical: responsiveValues.padding.md,
-    backgroundColor: colors.backgroundAlt,
+    alignItems: 'flex-start',
+    paddingHorizontal: responsiveValues.padding.lg,
+    paddingTop: responsiveValues.padding.lg,
+    paddingBottom: responsiveValues.padding.md,
   },
-  headerContent: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: responsiveValues.fonts.title,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  headerSubtitle: {
-    fontSize: responsiveValues.fonts.sm,
+  greeting: {
+    fontSize: responsiveValues.fonts.md,
     color: colors.grey,
-    marginTop: responsiveValues.padding.xs / 2,
+    fontWeight: '500',
   },
-  infoButton: {
-    padding: responsiveValues.padding.xs,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  section: {
-    paddingHorizontal: responsiveValues.padding.md,
-    marginVertical: responsiveValues.padding.xs,
-  },
-  sectionTitle: {
-    fontSize: responsiveValues.fonts.xl,
+  title: {
+    fontSize: responsiveValues.fonts.xxl,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: responsiveValues.padding.sm,
-  },
-  signalContainer: {
-    marginTop: responsiveValues.padding.xs,
-  },
-  quickStats: {
-    flexDirection: isTablet() ? 'row' : 'row',
-    justifyContent: 'space-around',
-    backgroundColor: colors.backgroundAlt,
-    marginHorizontal: responsiveValues.padding.md,
-    marginVertical: responsiveValues.padding.md,
-    borderRadius: responsiveValues.scale(12),
-    paddingVertical: responsiveValues.padding.lg,
-    flexWrap: isSmallDevice() ? 'wrap' : 'nowrap',
-    gap: isSmallDevice() ? responsiveValues.padding.sm : 0,
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: isTablet() ? 1 : undefined,
-    minWidth: isSmallDevice() ? '30%' : undefined,
-  },
-  statLabel: {
-    fontSize: responsiveValues.fonts.xs,
-    color: colors.grey,
     marginTop: responsiveValues.padding.xs / 2,
-    marginBottom: responsiveValues.padding.xs / 2,
-    textAlign: 'center',
   },
-  statValue: {
+  settingsButton: {
+    padding: responsiveValues.padding.xs,
+    borderRadius: responsiveValues.scale(8),
+    backgroundColor: colors.backgroundAlt,
+  },
+  section: {
+    paddingHorizontal: responsiveValues.padding.lg,
+    marginBottom: responsiveValues.padding.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: responsiveValues.padding.md,
+  },
+  sectionTitle: {
     fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
   },
+  viewAllText: {
+    fontSize: responsiveValues.fonts.sm,
+    color: colors.primary,
+    fontWeight: '600',
+  },
   bottomSheetContent: {
+    flex: 1,
     padding: responsiveValues.padding.lg,
   },
   bottomSheetTitle: {
-    fontSize: responsiveValues.fonts.xxl,
+    fontSize: responsiveValues.fonts.lg,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: responsiveValues.padding.sm,
+    marginBottom: responsiveValues.padding.lg,
+    textAlign: 'center',
   },
-  bottomSheetText: {
-    fontSize: responsiveValues.fonts.sm,
-    color: colors.grey,
-    lineHeight: responsiveValues.fonts.sm * 1.4,
-    marginBottom: responsiveValues.padding.md,
-  },
-  featureList: {
-    marginTop: responsiveValues.padding.xs,
-  },
-  featureItem: {
+  quickActions: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    marginBottom: responsiveValues.padding.xs,
   },
-  featureText: {
+  quickActionButton: {
+    alignItems: 'center',
+    padding: responsiveValues.padding.md,
+    borderRadius: responsiveValues.scale(12),
+    backgroundColor: colors.background,
+    minWidth: responsiveValues.scale(80),
+  },
+  quickActionText: {
     fontSize: responsiveValues.fonts.sm,
     color: colors.text,
-    marginLeft: responsiveValues.padding.xs,
+    fontWeight: '600',
+    marginTop: responsiveValues.padding.xs,
+    textAlign: 'center',
   },
 });
+
+export default DashboardScreen;
