@@ -32,6 +32,19 @@ export const useTradingData = () => {
     takeProfitPercent: 4,
   });
 
+  const [appSettings, setAppSettings] = useState({
+    tradingMode: 'DAY_TRADING' as TradingMode,
+    primaryTimeframe: '1h' as TimeFrame,
+    assetClasses: ['FOREX', 'CRYPTO'] as AssetType[],
+    autoTrading: false,
+    notifications: true,
+  });
+
+  const updateAppSettings = (newSettings: Partial<typeof appSettings>) => {
+    setAppSettings(prev => ({ ...prev, ...newSettings }));
+    console.log('App settings updated:', newSettings);
+  };
+
   // Enhanced real-time data updates with market awareness
   useEffect(() => {
     console.log('Initializing trading data with market awareness');
@@ -76,52 +89,68 @@ export const useTradingData = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Generate market-aware trading signals
+  const getAssetClass = (symbol: string): AssetType => {
+    if (symbol.includes('USD') && symbol.length === 6) return 'FOREX';
+    if (symbol.includes('BTC') || symbol.includes('ETH')) return 'CRYPTO';
+    // Add more complex logic for other asset types if needed
+    return 'FOREX';
+  };
+
+  // Generate market-aware trading signals based on app settings
   useEffect(() => {
     const generateSignals = () => {
-      const openMarkets = marketData.filter(data => {
-        const status = marketService.getMarketStatus(data.symbol);
-        return status.isOpen;
+      const { assetClasses, tradingMode, autoTrading } = appSettings;
+
+      const availableMarkets = marketData.filter(data => {
+        const marketStatus = marketService.getMarketStatus(data.symbol);
+        const assetClass = getAssetClass(data.symbol);
+        return marketStatus.isOpen && assetClasses.includes(assetClass);
       });
-      
-      if (openMarkets.length === 0) {
-        console.log('No markets open, skipping signal generation');
+
+      if (availableMarkets.length === 0) {
         return;
       }
-      
-      // Randomly generate new signals for open markets
-      if (Math.random() < 0.1) { // 10% chance every interval
-        const randomMarket = openMarkets[Math.floor(Math.random() * openMarkets.length)];
+
+      if (Math.random() < 0.1) { // 10% chance
+        const randomMarket = availableMarkets[Math.floor(Math.random() * availableMarkets.length)];
         const signalType = Math.random() > 0.5 ? 'BUY' : 'SELL';
-        const confidence = Math.floor(Math.random() * 30) + 70; // 70-100%
+        const confidence = Math.floor(Math.random() * 30) + 70;
+
+        let timeframes: TimeFrame[];
+        if (tradingMode === 'SCALPING') timeframes = ['1m', '5m', '15m'];
+        else if (tradingMode === 'DAY_TRADING') timeframes = ['15m', '30m', '1h'];
+        else timeframes = ['4h', '1d', '1w'];
         
+        const timeframe = timeframes[Math.floor(Math.random() * timeframes.length)];
+
         const newSignal: TradingSignal = {
           id: Date.now().toString(),
           type: signalType,
           asset: randomMarket.symbol,
           entryPrice: randomMarket.price,
-          stopLoss: signalType === 'BUY' 
-            ? randomMarket.price * 0.98 
-            : randomMarket.price * 1.02,
-          takeProfit: signalType === 'BUY' 
-            ? randomMarket.price * 1.04 
-            : randomMarket.price * 0.96,
+          stopLoss: signalType === 'BUY' ? randomMarket.price * 0.98 : randomMarket.price * 1.02,
+          takeProfit: signalType === 'BUY' ? randomMarket.price * 1.04 : randomMarket.price * 0.96,
           confidence,
-          timeframe: ['1h', '4h', '1d'][Math.floor(Math.random() * 3)],
+          timeframe,
+          mode: tradingMode,
           timestamp: new Date(),
-          reasoning: `Market analysis indicates ${signalType.toLowerCase()} opportunity based on technical indicators`,
+          reasoning: `Signal based on ${tradingMode} strategy for ${randomMarket.symbol}`,
           status: 'ACTIVE',
         };
-        
-        setTradingSignals(prev => [newSignal, ...prev.slice(0, 9)]); // Keep last 10 signals
-        console.log('Generated new trading signal:', newSignal);
+
+        setTradingSignals(prev => [newSignal, ...prev.slice(0, 9)]);
+        console.log('Generated new signal:', newSignal);
+
+        if (autoTrading && newSignal.confidence > 85) {
+          console.log(`Auto-trading enabled, executing high-confidence signal for ${newSignal.asset}`);
+          executeTrade(newSignal.id);
+        }
       }
     };
-    
-    const signalInterval = setInterval(generateSignals, 30000); // Check every 30 seconds
-    
+
+    const signalInterval = setInterval(generateSignals, 10000); // Check every 10 seconds
     return () => clearInterval(signalInterval);
-  }, [marketData]);
+  }, [marketData, appSettings]);
 
   const refreshData = async () => {
     setIsLoading(true);
@@ -216,21 +245,80 @@ export const useTradingData = () => {
     // Add to trade history
     const newTrade: TradeHistory = {
       id: Date.now().toString(),
+      signalId: signal.id,
       asset: signal.asset,
       type: signal.type,
       entryPrice: signal.entryPrice,
-      exitPrice: signal.entryPrice, // Will be updated when trade closes
+      exitPrice: 0, // Will be updated when trade closes
       quantity: 100000, // Standard lot
       profit: 0, // Will be calculated when trade closes
       profitPercent: 0,
       timestamp: new Date(),
       duration: 0,
+      status: 'OPEN',
     };
     
     setTradeHistory(prev => [newTrade, ...prev]);
     console.log('Trade executed for signal:', signalId);
     return true;
   };
+
+  // Simulate trade closure and update account info
+  useEffect(() => {
+    const tradeClosureInterval = setInterval(() => {
+      let closedTrade: TradeHistory | null = null;
+
+      const newTradeHistory = tradeHistory.map(trade => {
+        if (trade.status === 'OPEN' && Math.random() < 0.2) { // 20% chance to close
+          const signal = tradingSignals.find(s => s.id === trade.signalId);
+          if (!signal) return trade;
+
+          const isProfit = Math.random() < 0.7; // 70% chance of winning trade
+          const exitPrice = isProfit ? signal.takeProfit : signal.stopLoss;
+
+          const profit = (exitPrice - trade.entryPrice) * trade.quantity * (trade.type === 'BUY' ? 1 : -1);
+          const profitPercent = (profit / (trade.entryPrice * trade.quantity)) * 100;
+          const duration = (new Date().getTime() - trade.timestamp.getTime()) / (1000 * 60);
+
+          console.log(`Closing trade ${trade.id} for ${trade.asset} with profit ${profit.toFixed(2)}`);
+
+          closedTrade = {
+            ...trade,
+            exitPrice,
+            profit,
+            profitPercent,
+            duration,
+            status: 'CLOSED' as const,
+          };
+          return closedTrade;
+        }
+        return trade;
+      });
+
+      if (closedTrade) {
+        setTradeHistory(newTradeHistory);
+
+        // Update account info
+        setAccountInfo(prevInfo => {
+          const newBalance = prevInfo.balance + (closedTrade as TradeHistory).profit;
+          const allClosedTrades = newTradeHistory.filter(t => t.status === 'CLOSED');
+          const winningTrades = allClosedTrades.filter(t => t.profit > 0).length;
+          const newWinRate = allClosedTrades.length > 0 ? (winningTrades / allClosedTrades.length) * 100 : 0;
+
+          return {
+            ...prevInfo,
+            balance: newBalance,
+            equity: newBalance, // Simplified for now
+            totalProfit: prevInfo.totalProfit + (closedTrade as TradeHistory).profit,
+            totalTrades: allClosedTrades.length,
+            winRate: newWinRate,
+          };
+        });
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(tradeClosureInterval);
+  }, [tradeHistory, tradingSignals]);
 
   const getMarketStatus = (symbol: string) => {
     return marketService.getMarketStatus(symbol);
@@ -243,10 +331,12 @@ export const useTradingData = () => {
     newsEvents,
     accountInfo,
     riskSettings,
+    appSettings,
     isLoading,
     lastDataUpdate,
     refreshData,
     updateRiskSettings,
+    updateAppSettings,
     addTradingSignal,
     executeTrade,
     getMarketStatus,

@@ -7,7 +7,8 @@ export interface TradingSignal {
   stopLoss: number;
   takeProfit: number;
   confidence: number;
-  timeframe: string;
+  timeframe: TimeFrame;
+  mode: TradingMode;
   timestamp: Date;
   reasoning: string;
   status: 'ACTIVE' | 'EXECUTED' | 'CANCELLED';
@@ -45,6 +46,7 @@ export interface TechnicalIndicators {
 
 export interface TradeHistory {
   id: string;
+  signalId: string;
   asset: string;
   type: 'BUY' | 'SELL';
   entryPrice: number;
@@ -54,6 +56,7 @@ export interface TradeHistory {
   profitPercent: number;
   timestamp: Date;
   duration: number; // in minutes
+  status: 'OPEN' | 'CLOSED';
 }
 
 export interface RiskSettings {

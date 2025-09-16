@@ -24,7 +24,8 @@ export default function SignalsScreen() {
 
   const filteredSignals = tradingSignals.filter(signal => {
     const timeframeMatch = selectedTimeframe === 'ALL' || signal.timeframe === selectedTimeframe;
-    return timeframeMatch;
+    const modeMatch = selectedMode === 'ALL' || signal.mode === selectedMode;
+    return timeframeMatch && modeMatch;
   });
 
   const activeSignals = filteredSignals.filter(signal => signal.status === 'ACTIVE');

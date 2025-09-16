@@ -73,6 +73,7 @@ export const mockTradingSignals: TradingSignal[] = [
     takeProfit: 1.0890,
     confidence: 85,
     timeframe: '1h',
+    mode: 'DAY_TRADING',
     timestamp: new Date(),
     reasoning: 'RSI oversold, MACD bullish crossover, price above EMA20',
     status: 'ACTIVE',
@@ -86,6 +87,7 @@ export const mockTradingSignals: TradingSignal[] = [
     takeProfit: 1.2580,
     confidence: 72,
     timeframe: '4h',
+    mode: 'SWING_TRADING',
     timestamp: new Date(Date.now() - 30 * 60 * 1000),
     reasoning: 'Resistance at 1.2670, bearish divergence on RSI',
     status: 'ACTIVE',
@@ -95,6 +97,7 @@ export const mockTradingSignals: TradingSignal[] = [
 export const mockTradeHistory: TradeHistory[] = [
   {
     id: '1',
+    signalId: 'mock-1',
     asset: 'EURUSD',
     type: 'BUY',
     entryPrice: 1.0798,
@@ -104,9 +107,11 @@ export const mockTradeHistory: TradeHistory[] = [
     profitPercent: 3.3,
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     duration: 180,
+    status: 'CLOSED',
   },
   {
     id: '2',
+    signalId: 'mock-2',
     asset: 'BTCUSD',
     type: 'SELL',
     entryPrice: 44200,
@@ -116,9 +121,11 @@ export const mockTradeHistory: TradeHistory[] = [
     profitPercent: 0.9,
     timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     duration: 45,
+    status: 'CLOSED',
   },
   {
     id: '3',
+    signalId: 'mock-3',
     asset: 'GBPUSD',
     type: 'BUY',
     entryPrice: 1.2580,
@@ -128,6 +135,7 @@ export const mockTradeHistory: TradeHistory[] = [
     profitPercent: -2.8,
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     duration: 120,
+    status: 'CLOSED',
   },
 ];
 

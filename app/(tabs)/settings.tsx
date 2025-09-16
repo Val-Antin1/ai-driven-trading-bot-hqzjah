@@ -11,13 +11,15 @@ import Icon from '../../components/Icon';
 import { TimeFrame, TradingMode, AssetType } from '../../types/trading';
 
 export default function SettingsScreen() {
-  const { riskSettings, updateRiskSettings } = useTradingData();
+  const { riskSettings, updateRiskSettings, appSettings, updateAppSettings } = useTradingData();
   
-  const [notifications, setNotifications] = useState(true);
-  const [autoTrading, setAutoTrading] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeFrame>('1h');
-  const [selectedMode, setSelectedMode] = useState<TradingMode>('DAY_TRADING');
-  const [selectedAssets, setSelectedAssets] = useState<AssetType[]>(['FOREX', 'CRYPTO']);
+  const {
+    notifications,
+    autoTrading,
+    primaryTimeframe,
+    tradingMode,
+    assetClasses,
+  } = appSettings;
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = isTablet() ? ['20%', '40%', '80%'] : ['25%', '50%', '90%'];
@@ -37,11 +39,10 @@ export default function SettingsScreen() {
   ];
 
   const handleAssetToggle = (asset: AssetType) => {
-    setSelectedAssets(prev => 
-      prev.includes(asset) 
-        ? prev.filter(a => a !== asset)
-        : [...prev, asset]
-    );
+    const newAssetClasses = assetClasses.includes(asset)
+      ? assetClasses.filter(a => a !== asset)
+      : [...assetClasses, asset];
+    updateAppSettings({ assetClasses: newAssetClasses });
   };
 
   const handleAutoTradingToggle = (value: boolean) => {
@@ -51,11 +52,11 @@ export default function SettingsScreen() {
         'Auto trading will execute signals automatically based on your risk settings. Are you sure?',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Enable', onPress: () => setAutoTrading(true) },
+          { text: 'Enable', onPress: () => updateAppSettings({ autoTrading: true }) },
         ]
       );
     } else {
-      setAutoTrading(false);
+      updateAppSettings({ autoTrading: false });
     }
   };
 
@@ -100,7 +101,7 @@ export default function SettingsScreen() {
             
             <SettingItem
               title="Trading Strategy"
-              subtitle={`${selectedMode.replace('_', ' ')} • ${selectedTimeframe}`}
+              subtitle={`${tradingMode.replace('_', ' ')} • ${primaryTimeframe}`}
               icon="flash"
               onPress={openStrategySheet}
             />
@@ -127,13 +128,13 @@ export default function SettingsScreen() {
                     key={key}
                     style={[
                       styles.assetButton,
-                      selectedAssets.includes(key) && styles.assetButtonActive
+                      assetClasses.includes(key) && styles.assetButtonActive
                     ]}
                     onPress={() => handleAssetToggle(key)}
                   >
                     <Text style={[
                       styles.assetButtonText,
-                      selectedAssets.includes(key) && styles.assetButtonTextActive
+                      assetClasses.includes(key) && styles.assetButtonTextActive
                     ]}>
                       {label}
                     </Text>
@@ -153,7 +154,7 @@ export default function SettingsScreen() {
               rightComponent={
                 <Switch
                   value={notifications}
-                  onValueChange={setNotifications}
+                  onValueChange={(value) => updateAppSettings({ notifications: value })}
                   trackColor={{ false: colors.grey, true: colors.accent }}
                   thumbColor={notifications ? 'white' : '#f4f3f4'}
                 />
@@ -236,14 +237,14 @@ export default function SettingsScreen() {
                   key={key}
                   style={[
                     styles.strategyOption,
-                    selectedMode === key && styles.strategyOptionActive
+                    tradingMode === key && styles.strategyOptionActive
                   ]}
-                  onPress={() => setSelectedMode(key)}
+                  onPress={() => updateAppSettings({ tradingMode: key })}
                 >
                   <View style={styles.strategyOptionContent}>
                     <Text style={[
                       styles.strategyOptionTitle,
-                      selectedMode === key && styles.strategyOptionTitleActive
+                      tradingMode === key && styles.strategyOptionTitleActive
                     ]}>
                       {label}
                     </Text>
@@ -251,7 +252,7 @@ export default function SettingsScreen() {
                       {description}
                     </Text>
                   </View>
-                  {selectedMode === key && (
+                  {tradingMode === key && (
                     <Icon name="checkmark-circle" size={responsiveValues.scale(20)} color={colors.accent} />
                   )}
                 </TouchableOpacity>
@@ -266,13 +267,13 @@ export default function SettingsScreen() {
                     key={timeframe}
                     style={[
                       styles.timeframeButton,
-                      selectedTimeframe === timeframe && styles.timeframeButtonActive
+                      primaryTimeframe === timeframe && styles.timeframeButtonActive
                     ]}
-                    onPress={() => setSelectedTimeframe(timeframe)}
+                    onPress={() => updateAppSettings({ primaryTimeframe: timeframe })}
                   >
                     <Text style={[
                       styles.timeframeButtonText,
-                      selectedTimeframe === timeframe && styles.timeframeButtonTextActive
+                      primaryTimeframe === timeframe && styles.timeframeButtonTextActive
                     ]}>
                       {timeframe}
                     </Text>

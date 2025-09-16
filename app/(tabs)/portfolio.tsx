@@ -40,6 +40,35 @@ export default function PortfolioScreen() {
   const losingTrades = filteredTrades.filter(trade => trade.profit < 0);
   const winRate = filteredTrades.length > 0 ? (winningTrades.length / filteredTrades.length) * 100 : 0;
 
+  // Calculate Risk Metrics
+  const grossProfit = winningTrades.reduce((sum, trade) => sum + trade.profit, 0);
+  const grossLoss = Math.abs(losingTrades.reduce((sum, trade) => sum + trade.profit, 0));
+  const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : Infinity;
+
+  const returns = filteredTrades.map(trade => trade.profitPercent);
+  const avgReturn = returns.length > 0 ? returns.reduce((sum, r) => sum + r, 0) / returns.length : 0;
+  const stdDev = returns.length > 1
+    ? Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / (returns.length - 1))
+    : 0;
+  const sharpeRatio = stdDev > 0 ? avgReturn / stdDev : 0;
+
+  let maxDrawdown = 0;
+  let peak = accountInfo.balance;
+  let cumulativeProfit = 0;
+  const sortedTrades = [...filteredTrades].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+  for (const trade of sortedTrades) {
+    cumulativeProfit += trade.profit;
+    const currentPortfolioValue = accountInfo.balance + cumulativeProfit;
+    if (currentPortfolioValue > peak) {
+      peak = currentPortfolioValue;
+    }
+    const drawdown = ((peak - currentPortfolioValue) / peak) * 100;
+    if (drawdown > maxDrawdown) {
+      maxDrawdown = drawdown;
+    }
+  }
+
   const TradeItem: React.FC<{ trade: TradeHistory }> = ({ trade }) => (
     <View style={styles.tradeItem}>
       <View style={styles.tradeHeader}>
@@ -196,17 +225,17 @@ export default function PortfolioScreen() {
             <View style={styles.riskItem}>
               <Icon name="shield-checkmark" size={responsiveValues.scale(20)} color="#4CAF50" />
               <Text style={styles.riskLabel}>Max Drawdown</Text>
-              <Text style={styles.riskValue}>-3.2%</Text>
+              <Text style={styles.riskValue}>-{maxDrawdown.toFixed(1)}%</Text>
             </View>
             <View style={styles.riskItem}>
               <Icon name="trending-up" size={responsiveValues.scale(20)} color={colors.accent} />
               <Text style={styles.riskLabel}>Sharpe Ratio</Text>
-              <Text style={styles.riskValue}>1.85</Text>
+              <Text style={styles.riskValue}>{sharpeRatio.toFixed(2)}</Text>
             </View>
             <View style={styles.riskItem}>
               <Icon name="analytics" size={responsiveValues.scale(20)} color="#FF9800" />
               <Text style={styles.riskLabel}>Profit Factor</Text>
-              <Text style={styles.riskValue}>2.1</Text>
+              <Text style={styles.riskValue}>{profitFactor.toFixed(2)}</Text>
             </View>
           </View>
         </View>

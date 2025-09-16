@@ -19,6 +19,7 @@ const DashboardScreen: React.FC = () => {
     marketData,
     tradingSignals,
     accountInfo,
+    newsEvents,
     isLoading,
     refreshData,
     executeTrade,
@@ -105,6 +106,28 @@ const DashboardScreen: React.FC = () => {
                 signal={signal}
                 onExecute={executeTrade}
               />
+            ))}
+          </View>
+
+          {/* Upcoming News */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Upcoming News</Text>
+            {newsEvents.slice(0, 3).map((event) => (
+              <View key={event.id} style={styles.newsCard}>
+                <View style={styles.newsHeader}>
+                  <Text style={styles.newsTitle}>{event.title}</Text>
+                  <View style={[
+                    styles.impactBadge,
+                    event.impact === 'HIGH' && styles.impactBadgeHigh,
+                    event.impact === 'MEDIUM' && styles.impactBadgeMedium,
+                  ]}>
+                    <Text style={styles.impactBadgeText}>{event.impact}</Text>
+                  </View>
+                </View>
+                <Text style={styles.newsTime}>
+                  {new Date(event.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
             ))}
           </View>
 
@@ -229,6 +252,45 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: responsiveValues.padding.xs,
     textAlign: 'center',
+  },
+  newsCard: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: responsiveValues.scale(12),
+    padding: responsiveValues.padding.md,
+    marginBottom: responsiveValues.padding.xs,
+  },
+  newsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: responsiveValues.padding.xs,
+  },
+  newsTitle: {
+    fontSize: responsiveValues.fonts.sm,
+    fontWeight: '600',
+    color: colors.text,
+    flex: 1,
+  },
+  impactBadge: {
+    paddingHorizontal: responsiveValues.padding.xs,
+    paddingVertical: responsiveValues.padding.xs / 2,
+    borderRadius: responsiveValues.scale(4),
+    backgroundColor: colors.grey,
+  },
+  impactBadgeHigh: {
+    backgroundColor: '#F44336',
+  },
+  impactBadgeMedium: {
+    backgroundColor: '#FF9800',
+  },
+  impactBadgeText: {
+    fontSize: responsiveValues.fonts.xs,
+    fontWeight: '700',
+    color: 'white',
+  },
+  newsTime: {
+    fontSize: responsiveValues.fonts.sm,
+    color: colors.grey,
   },
 });
 
